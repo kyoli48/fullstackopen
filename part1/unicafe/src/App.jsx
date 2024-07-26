@@ -7,9 +7,15 @@ const Statistics = ({good, neutral, bad}) => {
   const ave = (good - bad) / total
   const positive = (good / total) * 100
   
+  if (total === 0) {
+    return (
+      <div>
+        No feedback given
+      </div>
+    )
+  }
   return (
     <div>
-      <h1>statistics</h1>
       good {good}
       <br />
       neutral {neutral}
@@ -40,6 +46,7 @@ const App = () => {
       <Button onClick={handleGood} text='good' />
       <Button onClick={handleNeutral} text='neutral' />
       <Button onClick={handleBad} text='bad' />
+      <h1>statistics</h1>
       <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   )
