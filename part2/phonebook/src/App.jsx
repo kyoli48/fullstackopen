@@ -30,12 +30,12 @@ const App = () => {
     }
 
     if (persons.some(person => person.name.toLowerCase() === newName.toLowerCase())) {
-      const person = persons.find(p => p.name === newName)
+      const id = persons.find(p => p.name.toLowerCase() === newName.toLowerCase()).id
       if (window.confirm(`${newName} already exists. replace old number with new one?`)) {
         personService
-          .update(person.id, personObject)
+          .update(id, personObject)
           .then(updatedPerson => 
-            setPersons(persons.map(p => p.id !== person.id ? p : updatedPerson)))
+            setPersons(persons.map(p => p.id !== id ? p : updatedPerson)))
       }
     } else {
       personService
