@@ -4,7 +4,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 
-import personService from './services/persons'
+import personService from './services/personService'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -29,13 +29,19 @@ const App = () => {
       number: newNumber
     }
 
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} already exists`)
+    if (persons.some(person => person.name.toLowerCase() === newName.toLowerCase())) {
+      const person = persons.find(p => p.name === newName)
+      if (window.confirm(`${newName} already exists. replace old number with new one?`)) {
+        personService
+          .update(person.id, personObject)
+          .then(updatedPerson => 
+            setPersons(persons.map(p => p.id !== person.id ? p : updatedPerson)))
+      }
     } else {
       personService
         .create(personObject)
-        .then(returnedPerson => 
-          setPersons(persons.concat(returnedPerson)))
+        .then(newPerson => 
+          setPersons(persons.concat(newPerson)))
       setNewName('')
       setNewNumber('')
     }
@@ -45,10 +51,12 @@ const App = () => {
     setNewSearch(event.target.value)
   }
 
-  const handleDelete = (id) => {
-    personService
-      .remove(id)
-      .then(() => setPersons(persons.filter(p => p.id !== id)))
+  const handleDelete = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personService
+      .remove(person.id)
+      .then(() => setPersons(persons.filter(p => p.id !== person.id)))
+    }
   }
 
   const personsToShow = newSearch.length === 0
