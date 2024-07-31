@@ -45,6 +45,12 @@ const App = () => {
     setNewSearch(event.target.value)
   }
 
+  const handleDelete = (id) => {
+    personService
+      .remove(id)
+      .then(() => setPersons(persons.filter(p => p.id !== id)))
+  }
+
   const personsToShow = newSearch.length === 0
     ? persons
     : persons.filter(person => person.name.toLowerCase().includes(newSearch.toLowerCase()))
@@ -62,7 +68,10 @@ const App = () => {
         newNumber={newNumber}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons
+        persons={personsToShow}
+        handleDelete={handleDelete}
+      />
     </div>
   )
 }
