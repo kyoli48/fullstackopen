@@ -6,12 +6,36 @@ import Persons from './components/Persons'
 
 import personService from './services/personService'
 
+const Success = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+  return (
+    <div className='success'>
+      {message}
+    </div>
+  )
+}
+
+const Error = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+  return (
+    <div className='error'>
+      {message}
+    </div>
+  )
+} 
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
   const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+
 
   const handleNewName = (event) => setNewName(event.target.value)
   const handleNewNumber = (event) => setNewNumber(event.target.value)
@@ -30,7 +54,7 @@ const App = () => {
       number: newNumber
     }
 
-    if (persons.some(person => person.name.toLowerCase() === newName.toLowerCase())) {
+    if (persons.some(p => p.name.toLowerCase() === newName.toLowerCase())) {
       const id = persons.find(p => p.name.toLowerCase() === newName.toLowerCase()).id
       if (window.confirm(`${newName} already exists. replace old number with new one?`)) {
         personService
@@ -38,6 +62,11 @@ const App = () => {
             setPersons(persons.map(p => p.id !== id ? p : updatedPerson))
             setSuccessMessage(`Updated ${updatedPerson.name}'s number`)
             setTimeout(() => setSuccessMessage(null), 5000)
+          })
+          .catch(error => {
+            setPersons(persons.filter(p =>  p.id !== id))
+            setErrorMessage(`Error: ${newName} has already been removed from the server`)
+            setTimeout(() => setErrorMessage(null), 5000)
           })
       }
     } else {
@@ -50,17 +79,6 @@ const App = () => {
       setNewName('')
       setNewNumber('')
     }
-  }
-
-  const Notification = ({ message }) => {
-    if (message === null) {
-      return null
-    }
-    return (
-      <div className='success'>
-        {message}
-      </div>
-    )
   }
 
   const handleSearch = (event) => {
@@ -82,7 +100,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={successMessage} />
+      <Success message={successMessage} />
+      <Error message={errorMessage} />
       <Filter handleSearch={handleSearch} />
       <h2>add a new</h2>
       <PersonForm 
