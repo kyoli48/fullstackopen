@@ -3,30 +3,10 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Success from './components/Success'
+import Error from './components/Error'
 
 import personService from './services/personService'
-
-const Success = ({ message }) => {
-  if (message === null) {
-    return null
-  }
-  return (
-    <div className='success'>
-      {message}
-    </div>
-  )
-}
-
-const Error = ({ message }) => {
-  if (message === null) {
-    return null
-  }
-  return (
-    <div className='error'>
-      {message}
-    </div>
-  )
-} 
 
 const App = () => {
   const [persons, setPersons] = useState([])
