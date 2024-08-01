@@ -11,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
+  const [successMessage, setSuccessMessage] = useState(null)
 
   const handleNewName = (event) => setNewName(event.target.value)
   const handleNewNumber = (event) => setNewNumber(event.target.value)
@@ -33,18 +34,33 @@ const App = () => {
       const id = persons.find(p => p.name.toLowerCase() === newName.toLowerCase()).id
       if (window.confirm(`${newName} already exists. replace old number with new one?`)) {
         personService
-          .update(id, personObject)
-          .then(updatedPerson => 
-            setPersons(persons.map(p => p.id !== id ? p : updatedPerson)))
+          .update(id, personObject).then(updatedPerson => {
+            setPersons(persons.map(p => p.id !== id ? p : updatedPerson))
+            setSuccessMessage(`Updated ${updatedPerson.name}'s number`)
+            setTimeout(() => setSuccessMessage(null), 5000)
+          })
       }
     } else {
       personService
-        .create(personObject)
-        .then(newPerson => 
-          setPersons(persons.concat(newPerson)))
+        .create(personObject).then(newPerson => {
+          setPersons(persons.concat(newPerson))
+          setSuccessMessage(`Added ${newPerson.name}`)
+          setTimeout(() => setSuccessMessage(null), 5000)
+        })
       setNewName('')
       setNewNumber('')
     }
+  }
+
+  const Notification = ({ message }) => {
+    if (message === null) {
+      return null
+    }
+    return (
+      <div className='success'>
+        {message}
+      </div>
+    )
   }
 
   const handleSearch = (event) => {
@@ -66,6 +82,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage} />
       <Filter handleSearch={handleSearch} />
       <h2>add a new</h2>
       <PersonForm 
