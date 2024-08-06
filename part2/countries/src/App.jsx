@@ -24,7 +24,7 @@ function App() {
   return (
     <>
       find countries <input onChange={handleSearch} />
-      <Countries countriesToShow={countriesToShow} />
+      <Countries countries={countriesToShow} />
     </>
   )
 }
