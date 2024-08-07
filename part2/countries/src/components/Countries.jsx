@@ -23,7 +23,7 @@ const Country = ({ country }) => {
             {show && (
                 <>
                     <p><b>capital</b> {country.capital}</p>
-                    <p><b>area</b> {country.area}</p>
+                    <p><b>area</b> {country.area} sq. km</p>
                     <b>languages:</b>
 
                     {country.languages
@@ -38,9 +38,9 @@ const Country = ({ country }) => {
                     <img src={country.flags.svg} alt={country.flags.alt} />
 
                     <h2>Weather in {country.capital}</h2>
-                    <p>temperature {weather.current.temp}</p>
+                    <p><b>temperature</b> {weather.current.temp}</p>
                     <img src={`https://openweathermap.org/img/wn/${weather.current.weather[0].icon}@2x.png`} />
-                    <p>wind speed {weather.current.wind_speed} m/s</p>
+                    <p><b>wind speed</b> {weather.current.wind_speed} m/s</p>
                 </>
             )}
 
