@@ -34,19 +34,18 @@ let persons = [
     }
 ]
 
+const Person = require('./models/person')
+
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person
+        .find({})
+        .then(people => res.json(people))
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = req.params.id
-    const person = persons.find(p => p.id === id)
-
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+    Person
+        .findById(req.params.id)
+        .then(person => res.json(person))
 })
 
 app.get('/info', (req, res) => {
@@ -77,15 +76,14 @@ app.post('/api/persons', (req, res) => {
         })
     }
 
-    const person = {
-        "id": String(Math.floor(Math.random() * 10000)),
+    const person = new Person({
         "name": body.name,
         "number": body.number
-    }
+    })
 
-    persons = persons.concat(person)
-
-    res.json(person)
+    person
+        .save()
+        .then(savedPerson => res.json(savedPerson))
 })
 
 const PORT = process.env.PORT || 3001
