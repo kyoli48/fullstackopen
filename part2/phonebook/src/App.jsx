@@ -38,7 +38,8 @@ const App = () => {
       const id = persons.find(p => p.name.toLowerCase() === newName.toLowerCase()).id
       if (window.confirm(`${newName} already exists. replace old number with new one?`)) {
         personService
-          .update(id, personObject).then(updatedPerson => {
+          .update(id, personObject)
+          .then(updatedPerson => {
             setPersons(persons.map(p => p.id !== id ? p : updatedPerson))
             setSuccessMessage(`Updated ${updatedPerson.name}'s number`)
             setTimeout(() => setSuccessMessage(null), 5000)
@@ -51,10 +52,16 @@ const App = () => {
       }
     } else {
       personService
-        .create(personObject).then(newPerson => {
+        .create(personObject)
+        .then(newPerson => {
           setPersons(persons.concat(newPerson))
           setSuccessMessage(`Added ${newPerson.name}`)
           setTimeout(() => setSuccessMessage(null), 5000)
+        })
+        .catch(error => {
+          console.log(error.response.data.error)
+          setErrorMessage(error.response.data.error)
+          setTimeout(() => setErrorMessage(null), 5000)
         })
       setNewName('')
       setNewNumber('')

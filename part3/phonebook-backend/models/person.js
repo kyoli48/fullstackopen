@@ -2,6 +2,9 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 const url = process.env.MONGODB_URI
+//NB: .env file is .gitignore'd & .dockerignore'd
+//MONGODB_URI saved w/ `fly secrets set`
+
 console.log('connecting to', url)
 
 mongoose.set('strictQuery',false)
@@ -14,8 +17,20 @@ mongoose.connect(url)
   })
 
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minLength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    minLength: 8,
+    validate : {
+      validator: number => /\d{2,3}-\d+/.test(number),
+      message: "Invalid format"
+    },
+    required: true
+  }
 })
 
 personSchema.set('toJSON', {

@@ -11,29 +11,6 @@ morgan.token('body', req =>
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(cors())
 
-let dummy_persons = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
 const Person = require('./models/person')
 
 app.get('/api/persons', (req, res) => {
@@ -73,35 +50,29 @@ app.delete('/api/persons/:id', (req, res) => {
         .catch(error => next(error))
 })
 
-app.post('/api/persons', (req, res) => {
-    const body = req.body
-
-    if (!body.name || !body.number) {
-        return res.status(400).json({ 
-          error: 'name/number missing' 
-        })
-    }
+app.post('/api/persons', (req, res, next) => {
+    const { name, number } = req.body
 
     const person = new Person({
-        "name": body.name,
-        "number": body.number
+        "name": name,
+        "number": number
     })
 
     person
         .save()
         .then(savedPerson => res.json(savedPerson))
+        .catch(error => next(error))
 })
 
-app.put('/api/persons/:id', (req, res) => {
-    const body = req.body
-
-    const person = {
-        name: body.name,
-        number: body.number
-    }
+app.put('/api/persons/:id', (req, res, next) => {
+    const { name, number } = req.body
 
     Person
-        .findByIdAndUpdate(req.params.id, person, { new: true })
+        .findByIdAndUpdate(
+            req.params.id, 
+            { name, number }, 
+            { new: true, runValidators: true, context: 'query' }
+        )
         .then(updatedPerson => res.json(updatedPerson))
         .catch(error => next(error))
 })
@@ -110,8 +81,10 @@ const errorHandler = (error, request, response, next) => {
     console.error(error.message)
   
     if (error.name === 'CastError') {
-      return response.status(400).send({ error: 'malformatted id' })
-    } 
+        return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
   
     next(error)
 }
