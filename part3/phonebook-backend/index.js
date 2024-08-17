@@ -4,14 +4,14 @@ const cors = require('cors')
 
 const app = express()
 
+app.use(express.static('dist'))
 app.use(express.json())
 morgan.token('body', req => 
     req.method === 'POST' ? JSON.stringify(req.body) : '')
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(cors())
-app.use(express.static('dist'))
 
-let persons = [
+let dummy_persons = [
     { 
       "id": "1",
       "name": "Arto Hellas", 
@@ -39,26 +39,38 @@ const Person = require('./models/person')
 app.get('/api/persons', (req, res) => {
     Person
         .find({})
-        .then(people => res.json(people))
+        .then(persons => res.json(persons))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     Person
         .findById(req.params.id)
-        .then(person => res.json(person))
+        .then(person => {
+            if (person) {
+                res.json(person)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
-    res.send(`
-        <p>Phonebook has info for ${persons.length} people.</p>
-        <p>${new Date()}</p>`)
+    Person
+        .countDocuments({})
+        .then(count => {
+            res.send(`
+                <p>Phonebook has info for ${count} ${count = 1 ? 'person' : 'people'}.</p>
+                <p>${new Date()}</p>
+            `)
+        })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = req.params.id
-    persons = persons.filter(p => p.id !== id)
-
-    res.status(204).end()
+    Person
+        .findByIdAndDelete(req.params.id)
+        .then(result => res.status(204).end())
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (req, res) => {
@@ -67,12 +79,6 @@ app.post('/api/persons', (req, res) => {
     if (!body.name || !body.number) {
         return res.status(400).json({ 
           error: 'name/number missing' 
-        })
-    }
-
-    if (persons.find(p => body.name.toLowerCase() === p.name.toLowerCase())) {
-        return res.status(400).json({ 
-            error: 'name already exists' 
         })
     }
 
@@ -85,6 +91,31 @@ app.post('/api/persons', (req, res) => {
         .save()
         .then(savedPerson => res.json(savedPerson))
 })
+
+app.put('/api/persons/:id', (req, res) => {
+    const body = req.body
+
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person
+        .findByIdAndUpdate(req.params.id, person, { new: true })
+        .then(updatedPerson => res.json(updatedPerson))
+        .catch(error => next(error))
+})
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } 
+  
+    next(error)
+}
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
